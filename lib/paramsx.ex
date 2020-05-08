@@ -1,5 +1,5 @@
 defmodule Paramsx do
-  alias Paramsx.Filter
+  alias Paramsx.{Atomize, Filter}
 
   def filter(params, filters), do: Filter.validate_for_presence(params, filters)
 
