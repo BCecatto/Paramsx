@@ -8,7 +8,8 @@ defmodule Paramsx.MixProject do
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      package: package()
+      package: package(),
+      docs: docs()
     ]
   end
 
@@ -19,7 +20,17 @@ defmodule Paramsx.MixProject do
   end
 
   defp deps do
-    [{:credo, "~> 1.4", only: [:dev, :test], runtime: false}]
+    [
+      {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.21.3", only: :dev, runtime: false}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "Paramx",
+      source_url: "https://github.com/BCecatto/Paramsx"
+    ]
   end
 
   defp package do

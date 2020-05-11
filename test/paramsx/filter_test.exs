@@ -26,7 +26,7 @@ defmodule Paramsx.FilterTest do
     test "optional params missing dont trigger tuple error" do
       params = %{"a" => "value_a", "b" => "value_b"}
 
-      filters = [optional: [:a]]
+      filters = [required: [:a], optional: [:c]]
 
       assert Filter.validate_for_presence(params, filters) == %{"a" => "value_a"}
     end
