@@ -1,5 +1,5 @@
 defmodule Paramsx.Filter do
-  def validate_for_presence(params, filters) do
+  def validate_for_presence(params, filters) when is_list(filters) do
     required = Keyword.get(filters, :required, [])
     optional = Keyword.get(filters, :optional, [])
 
@@ -27,7 +27,7 @@ defmodule Paramsx.Filter do
         {:ok, key_and_value} ->
           %{found_keys: [key_and_value | acc.found_keys], missing_keys: acc.missing_keys}
 
-        nil ->
+        {:error, :param_not_present} ->
           acc
       end
     end)
@@ -46,7 +46,7 @@ defmodule Paramsx.Filter do
   defp check_key(filter_key, params, :optional) do
     case Map.fetch(params, Atom.to_string(filter_key)) do
       {:ok, value} -> {:ok, {Atom.to_string(filter_key), value}}
-      :error -> nil
+      :error -> {:error, :param_not_present}
     end
   end
 

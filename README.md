@@ -1,5 +1,7 @@
 # Paramsx
 
+![CI](https://github.com/BCecatto/Paramsx/workflows/CI/badge.svg?branch=master)
+
 A lib to filter params
 
 ## Objective
@@ -11,29 +13,30 @@ We dont need wait for ecto raise a error in changeset to see a missing key in pa
 ```elixir
 def deps do
   [
-    {:paramsx, "~> 0.1.0"}
+    {:paramsx, "~> 0.1.2"}
   ]
 end
 ```
 ## Usage
-Atomize your maps
+### Atomize your maps
 
 Example:
-```
-Paramsx.atomize_keys(%{"foo" => "bar"} [brainn.co](https://github.com/brainn-co))
--> %{foo: "bar"}
+```elixir
+iex> Paramsx.atomize_keys(%{"foo" => "bar"}
+%{foo: "bar"}
 ```
 
-Filter with required and optional opt
+### Filter with required and optional params
 
 Example:
-```
-Paramsx.filter(%{"foo" => "bar", "other" => "value"}, [required: [:foo], optional: []])
--> %{"foo" => "bar"}
+```elixir
+iex> Paramsx.filter(%{"foo" => "bar", "other" => "value"}, [required: [:foo], optional: []])
+%{"foo" => "bar"}
 ```
 
-Incoming improvements:
- - [  ] Scroll through inside nested keywork list to be a better filter
+## Incoming improvements:
+  - [ ] Scroll through inside nested keywork list to be a better filter;
+  - [ ] Config to use Schema of your application to filter;
 
 ## License
 [Apache License, Version 2.0](LICENSE) 

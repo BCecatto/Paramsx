@@ -10,13 +10,13 @@ defmodule Paramsx do
 
   ## Examples
     
-      iex> Params.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo])
-      %{"foo" => "bar", "foo2" => "bar2"}
+      iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo])
+      %{"foo" => "bar"}
     
-      iex> Params.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo3])
+      iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo3])
       {:error, %{missing_keys: [:foo3]}}
 
-      iex> Params.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo], optional: [:foo3])
+      iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo], optional: [:foo3])
       %{"foo" => "bar"}  
   """
 
@@ -27,7 +27,7 @@ defmodule Paramsx do
 
   ## Examples
     
-      iex> Params.atomize_keys(%{"foo" => "bar"})
+      iex> Paramsx.atomize_keys(%{"foo" => "bar"})
       %{foo: "bar"}
   """
 
