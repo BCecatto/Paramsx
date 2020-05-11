@@ -4,10 +4,29 @@ defmodule Paramsx.FilterTest do
   alias Paramsx.Filter
 
   describe "validate_for_presence/2" do
-    test "given a filter return params filtered" do
+    test "given a option required return correct params filtered" do
       params = %{"a" => "value_a", "b" => "value_b"}
 
-      filters = [:a]
+      filters = [required: [:a, :b]]
+
+      assert Filter.validate_for_presence(params, filters) == %{
+               "a" => "value_a",
+               "b" => "value_b"
+             }
+    end
+
+    test "missing required params return tuple with error" do
+      params = %{"a" => "value_a", "b" => "value_b"}
+
+      filters = [required: [:c]]
+
+      assert {:error, %{missing_keys: [:c]}} = Filter.validate_for_presence(params, filters)
+    end
+
+    test "optional params missing dont trigger tuple error" do
+      params = %{"a" => "value_a", "b" => "value_b"}
+
+      filters = [optional: [:a]]
 
       assert Filter.validate_for_presence(params, filters) == %{"a" => "value_a"}
     end
@@ -15,7 +34,7 @@ defmodule Paramsx.FilterTest do
     test "given nested params dont mess up with it" do
       params = %{"a" => %{"c" => "value_c"}, "b" => "value_b"}
 
-      filters = [:a]
+      filters = [required: [:a]]
 
       assert Filter.validate_for_presence(params, filters) == %{"a" => %{"c" => "value_c"}}
     end
@@ -23,9 +42,18 @@ defmodule Paramsx.FilterTest do
     test "when filters is missing return empty map" do
       params = %{"a" => "value_a", "b" => "value_b"}
 
-      filters = [:c]
+      assert Filter.validate_for_presence(params, []) == %{}
+    end
 
-      assert Filter.validate_for_presence(params, filters) == %{}
+    test "given optional and required filter work oks" do
+      params = %{"a" => "value_a", "b" => "value_b"}
+
+      filters = [optional: [:a], required: [:b]]
+
+      assert Filter.validate_for_presence(params, filters) == %{
+               "a" => "value_a",
+               "b" => "value_b"
+             }
     end
   end
 end

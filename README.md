@@ -16,21 +16,22 @@ def deps do
 end
 ```
 ## Usage
+Atomize your maps
+
+Example:
 ```
 Paramsx.atomize_keys(%{"foo" => "bar"})
 -> %{foo: "bar"}
 ```
 
+Filter with required and optional opt
+
+Example:
 ```
-Paramsx.filter(%{"foo" => "bar", "other" => "value"}, [:foo])
+Paramsx.filter(%{"foo" => "bar", "other" => "value"}, [required: [:foo], optional: []])
 -> %{"foo" => "bar"}
 ```
 
 Incoming improvements:
- - [  ] Pass params like [required: [:a], optional: [:b]] to trigger error before reach ecto.
  - [  ] Scroll through inside nested keywork list to be a better filter
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/paramsx](https://hexdocs.pm/paramsx).
 
