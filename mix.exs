@@ -4,11 +4,12 @@ defmodule Paramsx.MixProject do
   def project do
     [
       app: :paramsx,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
+      description: "Library to act like to Rails' strong parameters",
       docs: docs()
     ]
   end
@@ -28,7 +29,7 @@ defmodule Paramsx.MixProject do
 
   defp docs do
     [
-      main: "Paramx",
+      main: "Paramsx",
       source_url: "https://github.com/BCecatto/Paramsx"
     ]
   end
@@ -38,8 +39,7 @@ defmodule Paramsx.MixProject do
       files: ["lib", "mix.exs", "README.md", "LICENSE*"],
       maintainers: ["Bruno Cecatto"],
       licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/BCecatto/Paramsx"},
-      description: "Library to act like to Rails' strong parameters"
+      links: %{"GitHub" => "https://github.com/BCecatto/Paramsx"}
     ]
   end
 end
