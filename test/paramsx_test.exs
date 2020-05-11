@@ -1,8 +1,9 @@
 defmodule ParamsxTest do
   use ExUnit.Case
+  doctest Paramsx
 
   describe "filter/2" do
-    test "filter params with success and atomize keys" do
+    test "filter params with success after that atomize keys" do
       params = %{"a" => "value_a", "b" => "value_b"}
 
       filters = [required: [:a, :b]]

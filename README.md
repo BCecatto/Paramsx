@@ -20,7 +20,7 @@ Atomize your maps
 
 Example:
 ```
-Paramsx.atomize_keys(%{"foo" => "bar"})
+Paramsx.atomize_keys(%{"foo" => "bar"} [brainn.co](https://github.com/brainn-co))
 -> %{foo: "bar"}
 ```
 
@@ -35,3 +35,5 @@ Paramsx.filter(%{"foo" => "bar", "other" => "value"}, [required: [:foo], optiona
 Incoming improvements:
  - [  ] Scroll through inside nested keywork list to be a better filter
 
+## License
+[Apache License, Version 2.0](LICENSE) 
