@@ -11,7 +11,7 @@
       },
       plugins: [],
       requires: [],
-      strict: false,
+      strict: true,
       color: true,
       checks: [
         #

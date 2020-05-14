@@ -9,7 +9,7 @@ defmodule Paramsx.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
-      description: "Library to act like to Rails' strong parameters",
+      description: "Paramsx provides functionally to whitelist and validate parameters",
       docs: docs()
     ]
   end
@@ -30,7 +30,7 @@ defmodule Paramsx.MixProject do
   defp docs do
     [
       main: "Paramsx",
-      source_url: "https://github.com/BCecatto/Paramsx"
+      source_url: "https://github.com/brainn-co/Paramsx"
     ]
   end
 
@@ -39,7 +39,7 @@ defmodule Paramsx.MixProject do
       files: ["lib", "mix.exs", "README.md", "LICENSE*"],
       maintainers: ["Bruno Cecatto"],
       licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/BCecatto/Paramsx"}
+      links: %{"GitHub" => "https://github.com/brainn-co/Paramsx"}
     ]
   end
 end

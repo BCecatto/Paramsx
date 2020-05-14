@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/BCecatto/Paramsx/workflows/CI/badge.svg?branch=master)
 
-A lib to filter params
+Paramsx provides functionally to whitelist and validate parameters
 
 ## Objective
 
