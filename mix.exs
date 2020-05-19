@@ -30,7 +30,7 @@ defmodule Paramsx.MixProject do
   defp docs do
     [
       main: "Paramsx",
-      source_url: "https://github.com/brainn-co/Paramsx"
+      source_url: "https://github.com/BCecatto/Paramsx"
     ]
   end
 
@@ -39,7 +39,7 @@ defmodule Paramsx.MixProject do
       files: ["lib", "mix.exs", "README.md", "LICENSE*"],
       maintainers: ["Bruno Cecatto"],
       licenses: ["Apache 2.0"],
-      links: %{"GitHub" => "https://github.com/brainn-co/Paramsx"}
+      links: %{"GitHub" => "https://github.com/BCecatto/Paramsx"}
     ]
   end
 end
