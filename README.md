@@ -13,19 +13,11 @@ We dont need wait for ecto raise a error in changeset to see a missing key in pa
 ```elixir
 def deps do
   [
-    {:paramsx, "~> 0.1.2"}
+    {:paramsx, "~> 0.2.0"}
   ]
 end
 ```
 ## Usage
-### Atomize your maps
-
-Example:
-```elixir
-iex> Paramsx.atomize_keys(%{"foo" => "bar"}
-%{foo: "bar"}
-```
-
 ### Filter with required and optional params
 
 Example:
@@ -35,7 +27,7 @@ iex> Paramsx.filter(%{"foo" => "bar", "other" => "value"}, [required: [:foo], op
 ```
 
 ## Incoming improvements:
-  - [ ] Scroll through inside nested keywork list to be a better filter;
+  - [x] Scroll through inside nested keyword list to be a better filter;
   - [ ] Config to use Schema of your application to filter;
 
 ## License
