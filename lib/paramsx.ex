@@ -6,6 +6,9 @@ defmodule Paramsx do
   @doc """
   Filter params based on your required and optional keyword. 
 
+  Important: You have to allow all params correctly, by default it allow only string or number
+  for a simple key, if you want specify a keyword list with correct params like the last example.
+
   ## Examples
       iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo])
       {:ok, %{foo: "bar"}}
@@ -16,12 +19,11 @@ defmodule Paramsx do
       iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo], optional: [:foo3])
       {:ok, %{foo: "bar"}}
 
-  ### Dont allow params list if it's not specified authorize only string and number
-     iex> Paramsx.filter(%{"foo" => %{"bar" => "value_bar"}}, required: [:foo])
-     {:ok, %{}}
+      iex> Paramsx.filter(%{"foo" => %{"bar" => "value_bar"}}, required: [:foo])
+      {:ok, %{}}
 
-     iex> Paramsx.filter(%{"foo" => %{"bar" => "value_bar"}}, required: [foo: [:bar]])
-     {:ok, %{foo: %{bar: "value_bar"}}}
+      iex> Paramsx.filter(%{"foo" => %{"bar" => "value_bar"}}, required: [foo: [:bar]])
+      {:ok, %{foo: %{bar: "value_bar"}}}
   """
 
   def filter(params, filters) when is_map(params) and is_list(filters) do

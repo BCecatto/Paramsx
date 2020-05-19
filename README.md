@@ -13,7 +13,7 @@ We dont need wait for ecto raise a error in changeset to see a missing key in pa
 ```elixir
 def deps do
   [
-    {:paramsx, "~> 0.2.0"}
+    {:paramsx, "~> 0.2.1"}
   ]
 end
 ```
