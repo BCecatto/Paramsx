@@ -11,17 +11,17 @@ defmodule ParamsxTest do
       assert Paramsx.filter(params, filters) ==
                {:ok,
                 %{
-                  "a" => "value_a",
-                  "b" => "value_b"
+                  a: "value_a",
+                  b: "value_b"
                 }}
     end
 
     test "missing required params return tuple with error" do
       params = %{"a" => "value_a", "b" => "value_b"}
 
-      filters = [required: [:c]]
+      filters = [required: [:b, c: [:d]]]
 
-      assert {:error, %{missing_keys: [:c]}} = Paramsx.filter(params, filters)
+      assert {:error, %{missing_keys: [c: [:d]]}} = Paramsx.filter(params, filters)
     end
 
     test "optional params missing dont trigger tuple error" do
@@ -29,15 +29,15 @@ defmodule ParamsxTest do
 
       filters = [required: [:a], optional: [:c]]
 
-      assert Paramsx.filter(params, filters) == {:ok, %{"a" => "value_a"}}
+      assert Paramsx.filter(params, filters) == {:ok, %{a: "value_a"}}
     end
 
     test "given nested params dont mess up with it" do
       params = %{"a" => %{"c" => "value_c"}, "b" => "value_b"}
 
-      filters = [required: [:a]]
+      filters = [required: [a: [:c]]]
 
-      assert Paramsx.filter(params, filters) == {:ok, %{"a" => %{"c" => "value_c"}}}
+      assert Paramsx.filter(params, filters) == {:ok, %{a: %{c: "value_c"}}}
     end
 
     test "when filters is missing return empty map" do
@@ -54,9 +54,80 @@ defmodule ParamsxTest do
       assert Paramsx.filter(params, filters) ==
                {:ok,
                 %{
-                  "a" => "value_a",
-                  "b" => "value_b"
+                  a: "value_a",
+                  b: "value_b"
                 }}
+    end
+
+    test "filter nested params" do
+      params = %{
+        "name" => "some name",
+        "phone" => "1199999999",
+        "description" => "some description",
+        "address" => %{
+          "street" => "street 5",
+          "type" => "some type"
+        },
+        "authentication" => %{
+          "role" => 5,
+          "admin" => "some private rule",
+          "login" => %{
+            "email" => "daniel@mail.com",
+            "phone" => "9999"
+          }
+        }
+      }
+
+      required = [:name, [authentication: [:role, login: [:email]]]]
+      optional = [:description, address: [:street]]
+
+      expected =
+        {:ok,
+         %{
+           name: "some name",
+           description: "some description",
+           address: %{street: "street 5"},
+           authentication: %{
+             role: 5,
+             login: %{
+               email: "daniel@mail.com"
+             }
+           }
+         }}
+
+      assert Paramsx.filter(params, required: required, optional: optional) == expected
+    end
+
+    test "when not specified a list in filter so dont accept this" do
+      params = %{
+        "name" => "some name",
+        "phone" => "1199999999",
+        "description" => "some description",
+        "address" => %{
+          "street" => "street 5",
+          "type" => "some type"
+        },
+        "authentication" => %{
+          "role" => "some role",
+          "admin" => "some private rule",
+          "login" => %{
+            "email" => "daniel@mail.com"
+          }
+        }
+      }
+
+      required = [:name, :authentication]
+      optional = [:description, address: [:street]]
+
+      expected =
+        {:ok,
+         %{
+           name: "some name",
+           description: "some description",
+           address: %{street: "street 5"}
+         }}
+
+      assert Paramsx.filter(params, required: required, optional: optional) == expected
     end
   end
 end

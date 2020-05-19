@@ -8,13 +8,17 @@ defmodule Paramsx do
 
   ## Examples
       iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo])
-      {:ok, %{"foo" => "bar"}}
+      {:ok, %{foo: "bar"}}
     
       iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo3])
       {:error, %{missing_keys: [:foo3]}}
 
       iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo], optional: [:foo3])
-      {:ok, %{"foo" => "bar"}}  
+      {:ok, %{foo: "bar"}}
+
+  ### Dont allow list if it's not specified
+     iex> Paramsx.filter(%{"foo" => %{"bar" => "value_bar"}}, required: [:foo])
+     {:ok, %{}}
   """
 
   def filter(params, filters) when is_map(params) and is_list(filters) do
@@ -24,52 +28,60 @@ defmodule Paramsx do
     params
     |> filter_required(required)
     |> filter_optional(params, optional)
-    |> handle_response()
   end
 
-  defp filter_required(params, filters) do
-    Enum.reduce(filters, %{found_keys: [], missing_keys: []}, fn key, acc ->
-      case check_key(key, params, :required) do
-        {:ok, key_and_value} ->
-          %{found_keys: [key_and_value | acc.found_keys], missing_keys: acc.missing_keys}
+  defp filter_required(params, filters),
+    do: reduce_filters(filters, %{}, params, :required)
 
-        {:error, missing_key: key} ->
-          %{found_keys: acc.found_keys, missing_keys: [key | acc.missing_keys]}
-      end
-    end)
-  end
+  defp filter_optional(%{} = result, params, filters),
+    do: {:ok, reduce_filters(filters, result, params, :optional)}
 
-  defp filter_optional(%{missing_keys: []} = start_acc, params, filters) do
-    Enum.reduce(filters, start_acc, fn key, acc ->
-      case check_key(key, params, :optional) do
-        {:ok, key_and_value} ->
-          %{found_keys: [key_and_value | acc.found_keys], missing_keys: acc.missing_keys}
+  defp filter_optional(missing, _params, _filters), do: {:error, %{missing_keys: missing}}
 
-        {:error, :param_not_present} ->
-          acc
-      end
-    end)
-  end
+  defp reduce_filters(filters, acc, params, mode),
+    do: Enum.reduce(filters, acc, &reduce_fun(&1, &2, params, mode))
 
-  defp filter_optional(%{missing_keys: _keys} = filtered, _params, _filters),
-    do: filtered
+  defp reduce_fun([{key, filters}], result, params, mode) when is_list(filters),
+    do: reduce_fun_for_nested(key, filters, result, params, mode)
 
-  defp check_key(filter_key, params, :required) do
-    case Map.fetch(params, Atom.to_string(filter_key)) do
-      {:ok, value} -> {:ok, {Atom.to_string(filter_key), value}}
-      :error -> {:error, missing_key: filter_key}
+  defp reduce_fun({key, filters}, result, params, mode) when is_list(filters),
+    do: reduce_fun_for_nested(key, filters, result, params, mode)
+
+  defp reduce_fun(key, %{} = result, params, mode) do
+    case fetch(params, key) do
+      {:ok, value} when is_binary(value) or is_number(value) -> put(result, key, value)
+      {:ok, _value} -> result
+      _not_found -> handle_missing_key(mode, result, key)
     end
   end
 
-  defp check_key(filter_key, params, :optional) do
-    case Map.fetch(params, Atom.to_string(filter_key)) do
-      {:ok, value} -> {:ok, {Atom.to_string(filter_key), value}}
-      :error -> {:error, :param_not_present}
+  defp reduce_fun(key, missing, params, _mode) when is_list(missing),
+    do: if(Map.has_key?(params, to_string(key)), do: missing, else: [key | missing])
+
+  defp reduce_fun_for_nested(key, filters, result, params, mode) do
+    case fetch(params, key) do
+      {:ok, value} -> handle_partial(mode, reduce_filters(filters, %{}, value, mode), key, result)
+      _not_found -> handle_partial(mode, filters, key, result)
     end
   end
 
-  defp handle_response(%{missing_keys: [], found_keys: keys}), do: {:ok, Map.new(keys)}
+  defp handle_partial(_mode, value, key, result) when is_map(result) and is_map(value),
+    do: put(result, key, value)
 
-  defp handle_response(%{missing_keys: missing_params}),
-    do: {:error, %{missing_keys: missing_params}}
+  defp handle_partial(:required, missing, key, %{}) when is_list(missing), do: [{key, missing}]
+
+  defp handle_partial(:required, missing, key, result)
+       when is_list(missing) and is_list(result) and is_atom(key),
+       do: [[{key, missing}] | result]
+
+  defp handle_partial(:optional, missing, _key, result)
+       when is_list(missing) and is_list(result),
+       do: result
+
+  defp handle_missing_key(:required, _result, key), do: [key]
+  defp handle_missing_key(:optional, result, _key), do: result
+
+  defp put(map, key, value) when is_atom(key), do: Map.put(map, key, value)
+
+  defp fetch(map, key) when is_atom(key), do: Map.fetch(map, Atom.to_string(key))
 end
