@@ -4,7 +4,7 @@ defmodule Paramsx.MixProject do
   def project do
     [
       app: :paramsx,
-      version: "0.4.1",
+      version: "0.4.2",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -23,9 +23,7 @@ defmodule Paramsx.MixProject do
   defp deps do
     [
       {:credo, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.21.3", only: :dev, runtime: false},
-      {:phoenix, "~> 1.5.1", only: :test, runtime: false},
-      {:plug_cowboy, "~> 2.0", only: :test, runtime: false}
+      {:ex_doc, "~> 0.21.3", only: :dev, runtime: false}
     ]
   end
 

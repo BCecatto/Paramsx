@@ -29,6 +29,9 @@ defmodule Paramsx do
       {:ok, %{foo: [%{bar: "value_bar"}]}}
   """
 
+  def filter(params, filters) when params == %{},
+    do: {:error, %{missing_keys: Keyword.get(filters, :required, [])}}
+
   def filter(params, filters) when is_map(params) and is_list(filters) do
     required = Keyword.get(filters, :required, [])
     optional = Keyword.get(filters, :optional, [])
@@ -66,6 +69,8 @@ defmodule Paramsx do
     |> call_for(filters, acc, params, mode)
   end
 
+  defp reduce_fun(_key, %{} = acc, [], _mode), do: acc
+
   defp reduce_fun(key, %{} = acc, %{} = params, mode) do
     case fetch(params, key) do
       {:ok, value} when is_binary(value) or is_number(value) -> Map.put(acc, key, value)
@@ -102,6 +107,8 @@ defmodule Paramsx do
        do: [[{key, missing}] | acc]
 
   defp handle_partial(:optional, missing, _k, acc) when is_list(missing) and is_list(acc), do: acc
+
+  defp generate_list_of_params(_keys, acc, _params, _key, _mode) when is_list(acc), do: acc
 
   defp generate_list_of_params(keys, %{} = acc, params, key, mode) do
     case fetch(params, key) do
@@ -156,6 +163,9 @@ defmodule Paramsx do
   defp split_word_by_dash(key), do: key |> to_string() |> String.split("_")
   defp key_type([key]), do: {:ok, %{key: String.to_atom(key), type: "default"}}
   defp key_type([key, type]), do: {:ok, %{key: String.to_atom(key), type: type}}
+
+  defp verify_list_of_atoms({:ok, %{type: "default", key: [key]}}, _list),
+    do: {:error, key}
 
   defp verify_list_of_atoms({:ok, %{type: "default", key: key}}, _list),
     do: {:error, key}

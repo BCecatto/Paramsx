@@ -3,6 +3,22 @@ defmodule ParamsxTest do
   doctest Paramsx
 
   describe "filter/2" do
+    test "given a empty params" do
+      params = %{}
+
+      required = [
+        :name,
+        [authentication: [:role, logins_list: [:email, :phone], foo_list: [:bar]]]
+      ]
+
+      optional = [:description, address: [:street]]
+
+      filters = [required: required, optional: optional]
+
+      assert Paramsx.filter(params, filters) ==
+               {:error, %{missing_keys: required}}
+    end
+
     test "given a option required return correct params filtered" do
       params = %{"a" => "value_a", "b" => "value_b"}
 
