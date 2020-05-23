@@ -75,11 +75,16 @@ defmodule ParamsxTest do
             %{"email" => "daniel@mail.com", "phone" => "9999", "admin" => true},
             %{"email" => "other@email", "phone" => "12312", "admin" => false},
             %{"email" => "bruno@email", "phone" => "12_312_312", "admin" => true}
-          ]
+          ],
+          "foo" => [%{"bar" => "bar_name"}]
         }
       }
 
-      required = [:name, [authentication: [:role, [logins: [:email, :phone]]]]]
+      required = [
+        :name,
+        [authentication: [:role, logins_list: [:email, :phone], foo_list: [:bar]]]
+      ]
+
       optional = [:description, address: [:street]]
 
       expected =
@@ -94,7 +99,8 @@ defmodule ParamsxTest do
                %{email: "bruno@email", phone: "12_312_312"},
                %{email: "other@email", phone: "12312"},
                %{email: "daniel@mail.com", phone: "9999"}
-             ]
+             ],
+             foo: [%{bar: "bar_name"}]
            }
          }}
 
@@ -112,24 +118,28 @@ defmodule ParamsxTest do
         },
         "authentication" => %{
           "role" => 5,
-          "admin" => "some private rule",
-          "logins" => [
-            %{"email" => "daniel@mail.com", "phone" => "9999", "admin" => true},
-            %{"email" => "other@email", "phone" => "12312", "admin" => false},
-            %{"email" => "bruno@email", "phone" => "12_312_312", "admin" => true}
-          ]
+          "admin" => "some private rule"
         }
       }
 
       required = [
         :name,
-        [authentication: [:role, [logins: [:email, :phone, :other, :other_missing]]]]
+        [authentication: [:role, [logins_list: [:email, :phone, :other, :other_missing]]]]
       ]
 
       optional = [:description, address: [:street]]
 
       assert Paramsx.filter(params, required: required, optional: optional) ==
-               {:error, %{missing_keys: [authentication: [logins: [:other_missing, :other]]]}}
+               {
+                 :error,
+                 %{
+                   missing_keys: [
+                     authentication: [
+                       logins: [:email, :phone, :other, :other_missing]
+                     ]
+                   ]
+                 }
+               }
     end
 
     test "when not specified a list in filter so dont accept this" do
