@@ -24,6 +24,9 @@ defmodule Paramsx do
 
       iex> Paramsx.filter(%{"foo" => %{"bar" => "value_bar"}}, required: [foo: [:bar]])
       {:ok, %{foo: %{bar: "value_bar"}}}
+
+      iex> Paramsx.filter(%{"foo" => [%{"bar" => "value_bar"}]}, required: [foo_list: [:bar]])
+      {:ok, %{foo: [%{bar: "value_bar"}]}}
   """
 
   def filter(params, filters) when is_map(params) and is_list(filters) do
@@ -47,14 +50,26 @@ defmodule Paramsx do
     do: Enum.reduce(filters, acc, &reduce_fun(&1, &2, params, mode))
 
   defp reduce_fun([{key, filters}], acc, params, mode) when is_list(filters) do
-    if list_of_atoms?(filters) do
-      generate_list_of_params(filters, acc, params, key, mode)
-    else
-      reduce_fun_for_nested(key, filters, acc, params, mode)
-    end
+    {:ok, %{key: key}} =
+      key
+      |> split_word_by_dash()
+      |> key_type()
+
+    reduce_fun_for_nested(key, filters, acc, params, mode)
   end
 
-  defp reduce_fun({key, filters}, acc, params, mode) when is_list(filters),
+  defp reduce_fun({key, filters}, acc, params, mode) when is_list(filters) do
+    key
+    |> split_word_by_dash()
+    |> key_type()
+    |> verify_list_of_atoms(filters)
+    |> call_for(filters, acc, params, mode)
+  end
+
+  defp call_for({:ok, key}, filters, acc, params, mode),
+    do: generate_list_of_params(filters, acc, params, key, mode)
+
+  defp call_for({:error, key}, filters, acc, params, mode),
     do: reduce_fun_for_nested(key, filters, acc, params, mode)
 
   defp reduce_fun(_key, %{} = acc, [], _mode), do: acc
@@ -140,6 +155,22 @@ defmodule Paramsx do
   defp handle_missing_key(:required, _acc, key), do: [key]
   defp handle_missing_key(:optional, acc, _key), do: acc
 
+  defp split_word_by_dash(key), do: key |> to_string() |> String.split("_")
+  defp key_type([key]), do: {:ok, %{key: String.to_atom(key), type: "default"}}
+  defp key_type([key, type]), do: {:ok, %{key: String.to_atom(key), type: type}}
+
+  defp verify_list_of_atoms({:ok, %{type: "default", key: key}}, _list),
+    do: {:error, key}
+
+  defp verify_list_of_atoms({:ok, %{type: "list", key: key}}, list) do
+    if list_of_atoms?(list) do
+      {:ok, key}
+    else
+      {:error, key}
+    end
+  end
+
   defp list_of_atoms?(list), do: Enum.all?(list, &is_atom/1)
+
   defp fetch(map, key) when is_atom(key) and is_map(map), do: Map.fetch(map, to_string(key))
 end
