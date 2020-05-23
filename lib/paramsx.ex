@@ -66,14 +66,6 @@ defmodule Paramsx do
     |> call_for(filters, acc, params, mode)
   end
 
-  defp call_for({:ok, key}, filters, acc, params, mode),
-    do: generate_list_of_params(filters, acc, params, key, mode)
-
-  defp call_for({:error, key}, filters, acc, params, mode),
-    do: reduce_fun_for_nested(key, filters, acc, params, mode)
-
-  defp reduce_fun(_key, %{} = acc, [], _mode), do: acc
-
   defp reduce_fun(key, %{} = acc, %{} = params, mode) do
     case fetch(params, key) do
       {:ok, value} when is_binary(value) or is_number(value) -> Map.put(acc, key, value)
@@ -154,6 +146,12 @@ defmodule Paramsx do
 
   defp handle_missing_key(:required, _acc, key), do: [key]
   defp handle_missing_key(:optional, acc, _key), do: acc
+
+  defp call_for({:ok, key}, filters, acc, params, mode),
+    do: generate_list_of_params(filters, acc, params, key, mode)
+
+  defp call_for({:error, key}, filters, acc, params, mode),
+    do: reduce_fun_for_nested(key, filters, acc, params, mode)
 
   defp split_word_by_dash(key), do: key |> to_string() |> String.split("_")
   defp key_type([key]), do: {:ok, %{key: String.to_atom(key), type: "default"}}

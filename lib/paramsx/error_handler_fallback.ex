@@ -10,7 +10,7 @@ defmodule Paramsx.ErrorHandlerFallback do
       end
 
       defp render_error(conn, missing_keys),
-        do: %{message: "Request body is invalid", errors: missing_keys}
+        do: Map.put(conn, :resp_body, %{message: "Request body is invalid", errors: missing_keys})
 
       defp format_missig_keys(keys), do: Enum.reduce(keys, %{}, &format_key/2)
 
