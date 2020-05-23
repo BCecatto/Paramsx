@@ -13,7 +13,7 @@ We dont need wait for ecto raise a error in changeset to see a missing key in pa
 ```elixir
 def deps do
   [
-    {:paramsx, "~> 0.4.1"}
+    {:paramsx, "~> 0.4.3"}
   ]
 end
 ```
@@ -50,6 +50,7 @@ iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo3])
 ## Incoming improvements:
   - [x] Scroll through inside nested keyword list to be a better filter;
   - [ ] Add more types to verify
+  - [ ] Add a option what you can customize presence of params in nested lists
   - [ ] Config to use Schema of your application to filter;
 
 ## License
