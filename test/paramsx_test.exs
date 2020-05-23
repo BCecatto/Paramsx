@@ -59,7 +59,7 @@ defmodule ParamsxTest do
                 }}
     end
 
-    test "filter nested params" do
+    test "nested list return correctly" do
       params = %{
         "name" => "some name",
         "phone" => "1199999999",
@@ -71,14 +71,15 @@ defmodule ParamsxTest do
         "authentication" => %{
           "role" => 5,
           "admin" => "some private rule",
-          "login" => %{
-            "email" => "daniel@mail.com",
-            "phone" => "9999"
-          }
+          "logins" => [
+            %{"email" => "daniel@mail.com", "phone" => "9999", "admin" => true},
+            %{"email" => "other@email", "phone" => "12312", "admin" => false},
+            %{"email" => "bruno@email", "phone" => "12_312_312", "admin" => true}
+          ]
         }
       }
 
-      required = [:name, [authentication: [:role, login: [:email]]]]
+      required = [:name, [authentication: [:role, [logins: [:email, :phone]]]]]
       optional = [:description, address: [:street]]
 
       expected =
@@ -89,13 +90,46 @@ defmodule ParamsxTest do
            address: %{street: "street 5"},
            authentication: %{
              role: 5,
-             login: %{
-               email: "daniel@mail.com"
-             }
+             logins: [
+               %{email: "bruno@email", phone: "12_312_312"},
+               %{email: "other@email", phone: "12312"},
+               %{email: "daniel@mail.com", phone: "9999"}
+             ]
            }
          }}
 
       assert Paramsx.filter(params, required: required, optional: optional) == expected
+    end
+
+    test "nested required list trigger correct error" do
+      params = %{
+        "name" => "some name",
+        "phone" => "1199999999",
+        "description" => "some description",
+        "address" => %{
+          "street" => "street 5",
+          "type" => "some type"
+        },
+        "authentication" => %{
+          "role" => 5,
+          "admin" => "some private rule",
+          "logins" => [
+            %{"email" => "daniel@mail.com", "phone" => "9999", "admin" => true},
+            %{"email" => "other@email", "phone" => "12312", "admin" => false},
+            %{"email" => "bruno@email", "phone" => "12_312_312", "admin" => true}
+          ]
+        }
+      }
+
+      required = [
+        :name,
+        [authentication: [:role, [logins: [:email, :phone, :other, :other_missing]]]]
+      ]
+
+      optional = [:description, address: [:street]]
+
+      assert Paramsx.filter(params, required: required, optional: optional) ==
+               {:error, %{missing_keys: [authentication: [logins: [:other_missing, :other]]]}}
     end
 
     test "when not specified a list in filter so dont accept this" do
@@ -119,13 +153,7 @@ defmodule ParamsxTest do
       required = [:name, :authentication]
       optional = [:description, address: [:street]]
 
-      expected =
-        {:ok,
-         %{
-           name: "some name",
-           description: "some description",
-           address: %{street: "street 5"}
-         }}
+      expected = {:error, %{missing_keys: [:authentication]}}
 
       assert Paramsx.filter(params, required: required, optional: optional) == expected
     end

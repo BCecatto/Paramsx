@@ -20,7 +20,7 @@ defmodule Paramsx do
       {:ok, %{foo: "bar"}}
 
       iex> Paramsx.filter(%{"foo" => %{"bar" => "value_bar"}}, required: [:foo])
-      {:ok, %{}}
+      {:error, %{missing_keys: [:foo]}}
 
       iex> Paramsx.filter(%{"foo" => %{"bar" => "value_bar"}}, required: [foo: [:bar]])
       {:ok, %{foo: %{bar: "value_bar"}}}
@@ -46,16 +46,23 @@ defmodule Paramsx do
   defp reduce_filters(filters, acc, params, mode),
     do: Enum.reduce(filters, acc, &reduce_fun(&1, &2, params, mode))
 
-  defp reduce_fun([{key, filters}], acc, params, mode) when is_list(filters),
-    do: reduce_fun_for_nested(key, filters, acc, params, mode)
+  defp reduce_fun([{key, filters}], acc, params, mode) when is_list(filters) do
+    if list_of_atoms?(filters) do
+      generate_list_of_params(filters, acc, params, key, mode)
+    else
+      reduce_fun_for_nested(key, filters, acc, params, mode)
+    end
+  end
 
   defp reduce_fun({key, filters}, acc, params, mode) when is_list(filters),
     do: reduce_fun_for_nested(key, filters, acc, params, mode)
 
-  defp reduce_fun(key, %{} = acc, params, mode) do
+  defp reduce_fun(_key, %{} = acc, [], _mode), do: acc
+
+  defp reduce_fun(key, %{} = acc, %{} = params, mode) do
     case fetch(params, key) do
       {:ok, value} when is_binary(value) or is_number(value) -> Map.put(acc, key, value)
-      {:ok, _value} -> acc
+      {:ok, _value} -> handle_missing_key(mode, acc, key)
       _not_found -> handle_missing_key(mode, acc, key)
     end
   end
@@ -75,6 +82,9 @@ defmodule Paramsx do
     end
   end
 
+  defp handle_partial(_mode, value, _key, result) when is_list(result) and is_map(value),
+    do: result
+
   defp handle_partial(_mode, value, key, acc) when is_map(acc) and is_map(value),
     do: Map.put(acc, key, value)
 
@@ -85,7 +95,51 @@ defmodule Paramsx do
        do: [[{key, missing}] | acc]
 
   defp handle_partial(:optional, missing, _k, acc) when is_list(missing) and is_list(acc), do: acc
+
+  defp generate_list_of_params(keys, %{} = acc, params, key, mode) do
+    case fetch(params, key) do
+      {:ok, nested_params} ->
+        nested_params
+        |> Enum.reduce([], &create_nested_map(&1, &2, keys, mode))
+        |> update_acc_with_generated_list(acc, key, mode)
+
+      _not_found ->
+        handle_missing_key(mode, acc, key)
+    end
+  end
+
+  defp create_nested_map(params, list_acc, keys, _mode) do
+    case create_params_map(keys, params) do
+      %{} = acc -> Enum.concat([acc], list_acc)
+      keys_not_found -> keys_not_found
+    end
+  end
+
+  defp create_params_map(keys, params) do
+    Enum.reduce(keys, %{}, fn key, map_acc ->
+      case fetch(params, key) do
+        {:ok, value} -> set_new_value(map_acc, key, value)
+        _not_found -> set_new_value(map_acc, key, [key])
+      end
+    end)
+  end
+
+  defp set_new_value(acc, key, value) when is_list(acc) and is_list(value),
+    do: [key | acc]
+
+  defp set_new_value(_acc, _key, value) when is_list(value), do: value
+  defp set_new_value(acc, key, value) when is_map(acc), do: Map.put(acc, key, value)
+
+  defp update_acc_with_generated_list(generated_list, acc, key, mode) do
+    case list_of_atoms?(generated_list) do
+      true -> handle_missing_key(mode, acc, {key, generated_list})
+      false -> Map.put(acc, key, generated_list)
+    end
+  end
+
   defp handle_missing_key(:required, _acc, key), do: [key]
   defp handle_missing_key(:optional, acc, _key), do: acc
-  defp fetch(map, key) when is_atom(key), do: Map.fetch(map, Atom.to_string(key))
+
+  defp list_of_atoms?(list), do: Enum.all?(list, &is_atom/1)
+  defp fetch(map, key) when is_atom(key) and is_map(map), do: Map.fetch(map, to_string(key))
 end
