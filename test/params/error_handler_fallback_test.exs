@@ -37,7 +37,7 @@ defmodule Paramsx.ErrorHandlerFallbackTest do
         message: "Request body is invalid"
       }
 
-      assert call(conn, params) == expected_response
+      assert call(conn, params).resp_body == expected_response
     end
   end
 end

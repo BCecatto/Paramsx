@@ -13,7 +13,7 @@ We dont need wait for ecto raise a error in changeset to see a missing key in pa
 ```elixir
 def deps do
   [
-    {:paramsx, "~> 0.3.0"}
+    {:paramsx, "~> 0.4.1"}
   ]
 end
 ```
@@ -44,10 +44,7 @@ iex> Paramsx.filter(%{"foo" => [%{"bar" => "value_bar"}]}, required: [foo_list: 
 
 # If some error appear was triggered the return will be:
 iex> Paramsx.filter(%{"foo" => "bar", "foo2" => "bar2"}, required: [:foo3])
-{:error, %{missing_keys: [:foo3]}}
-
-
- 
+{:error, %{missing_keys: [:foo3]}} 
 ```
 
 ## Incoming improvements:
