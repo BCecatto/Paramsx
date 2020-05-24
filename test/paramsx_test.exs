@@ -62,19 +62,6 @@ defmodule ParamsxTest do
       assert Paramsx.filter(params, []) == {:ok, %{}}
     end
 
-    test "given optional and required filter work oks" do
-      params = %{"a" => "value_a", "b" => "value_b"}
-
-      filters = [optional: [:a], required: [:b]]
-
-      assert Paramsx.filter(params, filters) ==
-               {:ok,
-                %{
-                  a: "value_a",
-                  b: "value_b"
-                }}
-    end
-
     test "nested list return correctly" do
       params = %{
         "name" => "some name",
@@ -159,6 +146,28 @@ defmodule ParamsxTest do
     end
 
     test "when not specified a list in filter so dont accept this" do
+      params = %{
+        "addresses_test_foo" => [
+          %{
+            "street" => "street 5",
+            "type" => "some type"
+          }
+        ]
+      }
+
+      required = [addresses_test_foo_list: [:street, :type]]
+
+      expected = {
+        :ok,
+        %{
+          addresses_test_foo: [%{street: "street 5", type: "some type"}]
+        }
+      }
+
+      assert Paramsx.filter(params, required: required) == expected
+    end
+
+    test "split correctly a key if type is pass in the format key_name_list" do
       params = %{
         "name" => "some name",
         "phone" => "1199999999",

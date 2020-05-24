@@ -29,6 +29,8 @@ defmodule Paramsx do
       {:ok, %{foo: [%{bar: "value_bar"}]}}
   """
 
+  @types ["list"]
+
   def filter(params, filters) when params == %{},
     do: {:error, %{missing_keys: Keyword.get(filters, :required, [])}}
 
@@ -161,8 +163,20 @@ defmodule Paramsx do
     do: reduce_fun_for_nested(key, filters, acc, params, mode)
 
   defp split_word_by_dash(key), do: key |> to_string() |> String.split("_")
+
   defp key_type([key]), do: {:ok, %{key: String.to_atom(key), type: "default"}}
-  defp key_type([key, type]), do: {:ok, %{key: String.to_atom(key), type: type}}
+
+  defp key_type(key) when is_list(key) do
+    {value, list} = List.pop_at(key, -1)
+
+    if value in @types do
+      {:ok, %{key: join_to_atom(list), type: "list"}}
+    else
+      {:ok, %{key: join_to_atom(key), type: "default"}}
+    end
+  end
+
+  defp join_to_atom(list), do: list |> Enum.join("_") |> String.to_atom()
 
   defp verify_list_of_atoms({:ok, %{type: "default", key: [key]}}, _list),
     do: {:error, key}
