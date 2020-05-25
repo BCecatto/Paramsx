@@ -19,7 +19,7 @@ end
 ```
 
 ## Add to your Action fallback
-You can add this code in your action fallback, it's just a suggstion and how you can do this:
+You can add this code in your action fallback, it's just a suggestion to do this:
 ```elixir
   def call(conn, {:error, %{missing_keys: missing_keys}}) do
     conn
@@ -51,7 +51,7 @@ Example:
 iex> Paramsx.filter(%{"foo" => "bar", "other" => "value"}, [required: [:foo], optional: []])
 {:ok, %{"foo" => "bar"}}
 
-# You have to explicit say that is list when have it:
+# You have to explicit say that is list when have it, in the fallowing format `key_name_list`
 iex> Paramsx.filter(%{"foo" => [%{"bar" => "value_bar"}]}, required: [foo_list: [:bar]])
 {:ok, %{foo: [%{bar: "value_bar"}]}}
 

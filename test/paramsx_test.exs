@@ -145,28 +145,6 @@ defmodule ParamsxTest do
                }
     end
 
-    test "when not specified a list in filter so dont accept this" do
-      params = %{
-        "addresses_test_foo" => [
-          %{
-            "street" => "street 5",
-            "type" => "some type"
-          }
-        ]
-      }
-
-      required = [addresses_test_foo_list: [:street, :type]]
-
-      expected = {
-        :ok,
-        %{
-          addresses_test_foo: [%{street: "street 5", type: "some type"}]
-        }
-      }
-
-      assert Paramsx.filter(params, required: required) == expected
-    end
-
     test "split correctly a key if type is pass in the format key_name_list" do
       params = %{
         "name" => "some name",
