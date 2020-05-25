@@ -145,6 +145,30 @@ defmodule ParamsxTest do
                }
     end
 
+    test "nested optional list dont trigger error" do
+      params = %{
+        "name" => "some name",
+        "phone" => "1199999999",
+        "description" => "some description",
+        "address" => %{
+          "street" => "street 5",
+          "type" => "some type"
+        },
+        "authentication" => %{
+          "role" => 5,
+          "admin" => "some private rule"
+        }
+      }
+
+      optional = [
+        :name,
+        [authentication: [:role, [logins_list: [:email, :phone, :other, :other_missing]]]]
+      ]
+
+      assert Paramsx.filter(params, optional: optional) ==
+               {:ok, %{authentication: %{role: 5}, name: "some name"}}
+    end
+
     test "split correctly a key if type is pass in the format key_name_list" do
       params = %{
         "name" => "some name",

@@ -6,9 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2020-05-25
+### fix
+- Dont trigger error in list when given optional params
+
 ## [0.4.4] - 2020-05-24
 ### fix
-- Remove dependencie with Plug to test
+- Removed dependencie with Plug to test
 
 
 ## [0.4.3] - 2020-05-23
@@ -17,12 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1] - 2020-05-23
 ### fix
-- return conn in action fallback handler
-
+- Returned conn in action fallback handler
 
 ## [0.4.0] - 2020-05-23
 ### Added
-- Add handler to action fallback from phoenix
+- Added handler to action fallback from phoenix
 
 ## [0.3.0] - 2020-05-23
 ### Added

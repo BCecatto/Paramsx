@@ -96,8 +96,8 @@ defmodule Paramsx do
     end
   end
 
-  defp handle_partial(_mode, value, _key, result) when is_list(result) and is_map(value),
-    do: result
+  defp handle_partial(_mode, value, _key, acc) when is_list(acc) and is_map(value),
+    do: acc
 
   defp handle_partial(_mode, value, key, acc) when is_map(acc) and is_map(value),
     do: Map.put(acc, key, value)
@@ -109,6 +109,9 @@ defmodule Paramsx do
        do: [[{key, missing}] | acc]
 
   defp handle_partial(:optional, missing, _k, acc) when is_list(missing) and is_list(acc), do: acc
+
+  defp handle_partial(_mode, value, _key, acc) when is_map(acc) and is_list(value),
+    do: acc
 
   defp generate_list_of_params(_keys, acc, _params, _key, _mode) when is_list(acc), do: acc
 
